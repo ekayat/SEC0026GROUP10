@@ -1548,9 +1548,15 @@ all output, plots, etc. within this report.</p>
 shape, spread). Include descriptive statistics, and histograms. Be sure
 to use terms discussed in class such as bimodal, skewed left, etc.</p>
 <pre class="r"><code>## quantitative variables are charges, age, BMI, and children. Here is mean, median, range, and standard deviation
-
-
-## unimodal, skewed right. Please notice several outliers on boxplot.
+summary(insurancedf)</code></pre>
+<pre><code>##     Charges           Age             BMI           Children   
+##  Min.   : 1242   Min.   :18.00   Min.   :19.80   Min.   :0.00  
+##  1st Qu.: 7899   1st Qu.:24.75   1st Qu.:26.51   1st Qu.:0.00  
+##  Median :12360   Median :43.00   Median :30.90   Median :1.00  
+##  Mean   :14337   Mean   :41.14   Mean   :30.37   Mean   :1.24  
+##  3rd Qu.:16978   3rd Qu.:57.00   3rd Qu.:33.36   3rd Qu.:2.75  
+##  Max.   :46131   Max.   :64.00   Max.   :47.74   Max.   :5.00</code></pre>
+<pre class="r"><code>## unimodal, skewed right. Please notice several outliers on boxplot.
 charges &lt;-  insurancedf[,1]
 mean(charges)</code></pre>
 <pre><code>## [1] 14336.94</code></pre>

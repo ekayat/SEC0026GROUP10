@@ -62,6 +62,7 @@ Perform univariate analyses on the quantitative variables (center, shape, spread
 
 ```{r q1}
 ## quantitative variables are charges, age, BMI, and children. Here is mean, median, range, and standard deviation
+summary(insurancedf)
 
 
 ## unimodal, skewed right. Please notice several outliers on boxplot.
