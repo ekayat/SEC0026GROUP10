@@ -44,8 +44,14 @@ Answer the following questions using complete sentences and attach all output, p
 library(readr)
 insurance_0026_Group10 <- read_csv("~/Documents/GitHub/SEC0026GROUP10/Data/insurance_0026_Group10.csv")
 View(insurance_0026_Group10)
+summary(insurance_0026_Group10)
 
-
+insurancedf <-  data.frame(insurance_0026_Group10)
+insurancedf$Female <- NULL
+insurancedf$Smoker <- NULL
+insurancedf$WinterSprings<- NULL
+insurancedf$WinterPark <- NULL
+insurancedf$Oviedo <- NULL
 ```
 
 
@@ -56,9 +62,7 @@ Perform univariate analyses on the quantitative variables (center, shape, spread
 
 ```{r q1}
 ## quantitative variables are charges, age, BMI, and children. Here is mean, median, range, and standard deviation
-summary(insurance_0026_Group10)
 
-insurancedf <-  data.frame(insurance_0026_Group10)
 
 ## unimodal, skewed right. Please notice several outliers on boxplot.
 charges <-  insurancedf[,1]
@@ -94,7 +98,7 @@ hist(BMI)
 boxplot(BMI)
 
 ## unimodal, skewed right
-children <-  insurancedf[,5]
+children <-  insurancedf[,4]
 mean(children)
 median(children)
 range(children)
