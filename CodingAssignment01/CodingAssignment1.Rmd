@@ -88,6 +88,7 @@ hist(age)
 boxplot(age)
 plot(charges~age, data = insurancedf)
 
+
 ## unimodal, skewed right. Please notice one outlier on boxplot. 
 BMI <-  insurancedf[,3]
 mean(BMI)
@@ -99,6 +100,7 @@ IQR(BMI)
 hist(BMI)
 boxplot(BMI)
 plot(charges~BMI, data = insurancedf)
+
 
 ## unimodal, skewed right
 children <-  insurancedf[,4]
@@ -134,7 +136,8 @@ chargeslm <-lm(charges ~ age + BMI + children, data = insurancedf)
 summary(chargeslm)
 
 ```
-## Charges = 13573.19 - 23.2*age + 90.38*BMI - 827.79*children
+
+$$Charges = 13573.19 - 23.2*Age +90.38*BMI - 827.79*Children$$
 also write out the regression cleanly in this document.
 
 # Question 4
