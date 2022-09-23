@@ -121,6 +121,51 @@ plot(charges~children, data = insurancedf)
 Perform bivariate analyses on the quantitative variables (direction, strength and form). Describe the linear association between all variables. 
 
 ```{r q2}
+##  
+
+## Age (no relationship per r value, p value, or scatterplot)
+### Scatterplot
+plot(insurancedf$Age, insurancedf$Charges, pch=16, col='blue',
+     main='Charges vs. Age',
+     xlab='Age', ylab='Charges')
+
+
+### correlation
+cor(insurancedf$Age, insurancedf$Charges)
+
+### simple linear regression model and fit
+fit <- lm(charges ~ age, data=insurancedf)
+summary(fit)
+
+## BMI (no relationship per r value, p value, or scatterplot)
+### Scatterplot
+plot(insurancedf$BMI, insurancedf$Charges, pch=16, col='blue',
+     main='Charges vs. BMI',
+     xlab='BMI', ylab='Charges')
+
+
+### correlation
+cor(insurancedf$Age, insurancedf$Charges)
+
+### simple linear regression model and fit
+fit <- lm(charges ~ BMI, data=insurancedf)
+summary(fit)
+
+## Children (no relationship per r value, p value, or scatterplot)
+### Scatterplot
+plot(insurancedf$Children, insurancedf$Charges, pch=16, col='blue',
+     main='Charges vs. Children',
+     xlab='Children', ylab='Charges')
+
+
+### correlation
+cor(insurancedf$Children, insurancedf$Charges)
+
+### simple linear regression model and fit
+fit <- lm(charges ~ children, data=insurancedf)
+summary(fit)
+
+
 
 ```
 
