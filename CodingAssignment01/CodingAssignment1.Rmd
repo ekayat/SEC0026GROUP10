@@ -171,7 +171,7 @@ An eager insurance representative comes back with a potential client. The client
 
 ## I am unsure how to find the 95% confidence interval from here. 
 ```{r q4}
-13573.19 - 23.2 * 40 + 90.38 * 40 - 827.79 * 1
+13573.19 - 23.2 * 40 + 90.38 * 30 - 827.79 * 1
 
 ## 1 13429.67 9654.253 17205.08
 ```
