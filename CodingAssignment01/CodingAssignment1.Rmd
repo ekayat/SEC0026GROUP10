@@ -3,13 +3,13 @@ title: "Coding Assignment 1"
 author: "Team N"
 date: "Due: 2021-09-29 23:59"
 output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
   html_document:
     toc: yes
     toc_depth: 2
     toc_float: yes
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
 ---
 
 ```{r setup, include=FALSE}
@@ -19,6 +19,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r packages}
 # Put any packages you want here
 library(readxl)
+library(gt) 
+library(gtsummary) 
+library(corrplot) 
+library(htmlwidgets)
+library(readr)
+library(car)
 ```
 
 
@@ -42,7 +48,7 @@ Answer the following questions using complete sentences and attach all output, p
 ```{r dataset, include=FALSE}
 ## Bring in the dataset here
 library(readr)
-insurance_0026_Group10 <- read_csv("~/Documents/GitHub/SEC0026GROUP10/Data/insurance_0026_Group10.csv")
+insurance_0026_Group10 <- read_csv("C:/Users/samuel frisco/Documents/GitHub/SEC0026GROUP10/Data/insurance_0026_Group10.csv")
 View(insurance_0026_Group10)
 summary(insurance_0026_Group10)
 
@@ -111,7 +117,22 @@ hist(children)
 boxplot(children)
 plot(charges~children, data = insurancedf)
 
+sd(insurancedf$Charges, na.rm= TRUE)
+## [1] 13295.63
+sd(insurancedf$Age, na.rm= TRUE)
+## [1] 14.76135
+sd(insurancedf$BMI, na.rm= TRUE)
+## [1] 6.463692
+sd(insurancedf$Children, na.rm= TRUE)
+## [1] 1.159873
+getModes <- function(x) {
+  ux <- unique(x)
+  tab <- tabulate(match(x, ux))
+  ux[tab == max(tab)]
+}
 
+
+getModes(insurancedf$Children)
 ```
 
 # Question 2
@@ -119,6 +140,13 @@ plot(charges~children, data = insurancedf)
 Perform bivariate analyses on the quantitative variables (direction, strength and form). Describe the linear association between all variables. 
 
 ```{r q2}
+corrplot(cor(insurancedf),
+         type = "lower",
+         order = "hclust", 
+         tl.col = "black",
+         tl.srt = 45,
+         addCoef.col = "black",
+         diag = FALSE)
 
 ```
 
@@ -144,4 +172,6 @@ An eager insurance representative comes back with a potential client. The client
 ## I am unsure how to find the 95% confidence interval from here. 
 ```{r q4}
 13573.19 - 23.2 * 40 + 90.38 * 40 - 827.79 * 1
+
+## 1 13429.67 9654.253 17205.08
 ```
