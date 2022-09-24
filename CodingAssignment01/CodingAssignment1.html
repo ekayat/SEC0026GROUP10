@@ -1768,10 +1768,21 @@ The client is 40, their BMI is 30, and they have one dependent. Using
 the regression equation above, predict the amount of medical expenses
 associated with this policy. (Provide a 95% confidence interval as
 well)</p>
-<div id="i-am-unsure-how-to-find-the-95-confidence-interval-from-here." class="section level2">
-<h2>I am unsure how to find the 95% confidence interval from here.</h2>
+<div id="i-have-tried-two-ways-to-solve-this.-the-first-uses-coefficients-from-the-previous-equation-the-second-is-a-prediction-model-that-includes-the-confidence-interval.-i-believe-the-second-method-to-be-correct." class="section level2">
+<h2>I have tried two ways to solve this. The first uses coefficients
+from the previous equation, the second is a prediction model that
+includes the confidence interval. I believe the second method to be
+correct.</h2>
 <pre class="r"><code>13573.19 - 23.2 * 40 + 90.38 * 40 - 827.79 * 1</code></pre>
 <pre><code>## [1] 15432.6</code></pre>
+<pre class="r"><code>data.frame &lt;- insurancedf
+newPrediction &lt;- data.frame(age = 40, BMI = 30, children = 1)
+predict(chargeslm,
+        newdata = newPrediction,
+        interval = &quot;confidence&quot;,
+        level = .95)</code></pre>
+<pre><code>##        fit      lwr      upr
+## 1 14528.56 11558.31 17498.82</code></pre>
 </div>
 </div>
 
