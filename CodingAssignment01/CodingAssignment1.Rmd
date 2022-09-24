@@ -1,15 +1,18 @@
 ---
 title: "Coding Assignment 1"
-author: "Team N"
-date: "Due: 2021-09-29 23:59"
+author: "Group 10"
+date: "Due: 2022-09-25 23:59"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '2'
   html_document:
     toc: yes
     toc_depth: 2
     toc_float: yes
+  word_document:
+    toc: yes
+    toc_depth: '2'
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
 ```{r setup, include=FALSE}
@@ -25,6 +28,7 @@ library(corrplot)
 library(htmlwidgets)
 library(readr)
 library(car)
+
 ```
 
 
@@ -47,8 +51,7 @@ Answer the following questions using complete sentences and attach all output, p
 
 ```{r dataset, include=FALSE}
 ## Bring in the dataset here
-library(readr)
-insurance_0026_Group10 <- read_csv("C:/Users/samuel frisco/Documents/GitHub/SEC0026GROUP10/Data/insurance_0026_Group10.csv")
+insurance_0026_Group10 <- read_csv("~/Documents/GitHub/SEC0026GROUP10/Data/insurance_0026_Group10.csv")
 View(insurance_0026_Group10)
 summary(insurance_0026_Group10)
 
@@ -94,6 +97,7 @@ hist(age)
 boxplot(age)
 plot(charges~age, data = insurancedf)
 
+
 ## unimodal, skewed right. Please notice one outlier on boxplot. 
 BMI <-  insurancedf[,3]
 mean(BMI)
@@ -105,6 +109,7 @@ IQR(BMI)
 hist(BMI)
 boxplot(BMI)
 plot(charges~BMI, data = insurancedf)
+
 
 ## unimodal, skewed right
 children <-  insurancedf[,4]
@@ -131,7 +136,6 @@ getModes <- function(x) {
   ux[tab == max(tab)]
 }
 
-
 getModes(insurancedf$Children)
 ```
 
@@ -140,6 +144,50 @@ getModes(insurancedf$Children)
 Perform bivariate analyses on the quantitative variables (direction, strength and form). Describe the linear association between all variables. 
 
 ```{r q2}
+##  
+
+## Age (no relationship per r value, p value, or scatterplot)
+### Scatterplot
+plot(insurancedf$Age, insurancedf$Charges, pch=16, col='blue',
+     main='Charges vs. Age',
+     xlab='Age', ylab='Charges')
+
+
+### correlation
+cor(insurancedf$Age, insurancedf$Charges)
+
+### simple linear regression model and fit
+fit <- lm(charges ~ age, data=insurancedf)
+summary(fit)
+
+## BMI (no relationship per r value, p value, or scatterplot)
+### Scatterplot
+plot(insurancedf$BMI, insurancedf$Charges, pch=16, col='blue',
+     main='Charges vs. BMI',
+     xlab='BMI', ylab='Charges')
+
+
+### correlation
+cor(insurancedf$Age, insurancedf$Charges)
+
+### simple linear regression model and fit
+fit <- lm(charges ~ BMI, data=insurancedf)
+summary(fit)
+
+## Children (no relationship per r value, p value, or scatterplot)
+### Scatterplot
+plot(insurancedf$Children, insurancedf$Charges, pch=16, col='blue',
+     main='Charges vs. Children',
+     xlab='Children', ylab='Charges')
+
+
+### correlation
+cor(insurancedf$Children, insurancedf$Charges)
+
+### simple linear regression model and fit
+fit <- lm(charges ~ children, data=insurancedf)
+summary(fit)
+
 corrplot(cor(insurancedf),
          type = "lower",
          order = "hclust", 
@@ -161,17 +209,26 @@ chargeslm <-lm(charges ~ age + BMI + children, data = insurancedf)
 
 summary(chargeslm)
 
+
 ```
-## Charges = 13573.19 - 23.2*age + 90.38*BMI - 827.79*children
 also write out the regression cleanly in this document.
+
+$$Charges = 13573.19 - 23.2*Age +90.38*BMI - 827.79*Children$$
 
 # Question 4
 
 An eager insurance representative comes back with a potential client. The client is 40, their BMI is 30, and they have one dependent. Using the regression equation above, predict the amount of medical expenses associated with this policy. (Provide a 95% confidence interval as well)
 
-## I am unsure how to find the 95% confidence interval from here. 
+I have tried two ways to solve this. The first uses coefficients from the previous equation, the second is a prediction model that includes the confidence interval. While the answers are nearly identical (off by $0.24 from over $14.5K) I believe the second method to be correct method we are looking for. 
 ```{r q4}
 13573.19 - 23.2 * 40 + 90.38 * 30 - 827.79 * 1
+```
 
-## 1 13429.67 9654.253 17205.08
+```{r}
+data.frame <- insurancedf
+newPrediction <- data.frame(age = 40, BMI = 30, children = 1)
+predict(chargeslm,
+        newdata = newPrediction,
+        interval = "confidence",
+        level = .95)
 ```
