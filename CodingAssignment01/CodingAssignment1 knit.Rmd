@@ -1,0 +1,209 @@
+---
+title: "Coding Assignment 1"
+author: "Group 10"
+date: "Due: 2022-09-25 23:59"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+    toc_float: yes
+  word_document:
+    toc: yes
+    toc_depth: '2'
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r packages}
+# Put any packages you want here
+library(readxl)
+
+```
+
+
+A Florida health insurance company wants to predict annual claims for individual clients. The company pulls a random sample of 50 customers. The owner wishes to charge an actuarially fair premium to ensure a normal rate of return. The owner collects all of their current customer’s health care expenses from the last year and compares them with what is known about each customer’s plan. 
+
+The data on the 50 customers in the sample is as follows:
+
+-	Charges: Total medical expenses for a particular insurance plan (in dollars)
+-	Age: Age of the primary beneficiary
+-	BMI: Primary beneficiary’s body mass index (kg/m2)
+-	Female: Primary beneficiary’s birth sex (0 = Male, 1 = Female)
+-	Children: Number of children covered by health insurance plan (includes other dependents as well)
+-	Smoker: Indicator if primary beneficiary is a smoker (0 = non-smoker, 1 = smoker)
+-	Cities: Dummy variables for each city with the default being Sanford
+
+Answer the following questions using complete sentences and attach all output, plots, etc. within this report.
+
+
+**For this assignment, ignore the categorical variables (gender, smoker, cities)**
+
+```{r dataset, include=FALSE}
+## Bring in the dataset here
+library(readr)
+insurance_0026_Group10 <- read_csv("~/Documents/GitHub/SEC0026GROUP10/Data/insurance_0026_Group10.csv")
+View(insurance_0026_Group10)
+summary(insurance_0026_Group10)
+
+insurancedf <-  data.frame(insurance_0026_Group10)
+insurancedf$Female <- NULL
+insurancedf$Smoker <- NULL
+insurancedf$WinterSprings<- NULL
+insurancedf$WinterPark <- NULL
+insurancedf$Oviedo <- NULL
+```
+
+
+
+# Question 1
+
+Perform univariate analyses on the quantitative variables (center, shape, spread). Include descriptive statistics, and histograms. Be sure to use terms discussed in class such as bimodal, skewed left, etc.
+
+```{r q1}
+## quantitative variables are charges, age, BMI, and children. Here is mean, median, range, and standard deviation
+summary(insurancedf)
+
+
+## unimodal, skewed right. Please notice several outliers on boxplot.
+charges <-  insurancedf[,1]
+mean(charges)
+median(charges)
+range(charges)
+max(charges) - min(charges)
+sd(charges)
+IQR(charges)
+hist(charges)
+boxplot(charges)
+
+## While I am unsure as to the skewness, it is most certainly not symmetrical. And while the one true mode is 59, this distrubution would be considered multimodal 
+age <-  insurancedf[,2]
+mean(age)
+median(age)
+range(age)
+max(age) - min(age)
+sd(age)
+IQR(age)
+hist(age)
+boxplot(age)
+plot(charges~age, data = insurancedf)
+
+
+## unimodal, skewed right. Please notice one outlier on boxplot. 
+BMI <-  insurancedf[,3]
+mean(BMI)
+median(BMI)
+range(BMI)
+max(BMI) - min(BMI)
+sd(BMI)
+IQR(BMI)
+hist(BMI)
+boxplot(BMI)
+plot(charges~BMI, data = insurancedf)
+
+
+## unimodal, skewed right
+children <-  insurancedf[,4]
+mean(children)
+median(children)
+range(children)
+max(children) - min(children)
+sd(children)
+hist(children)
+boxplot(children)
+plot(charges~children, data = insurancedf)
+
+
+```
+
+# Question 2
+
+Perform bivariate analyses on the quantitative variables (direction, strength and form). Describe the linear association between all variables. 
+
+```{r q2}
+##  
+
+## Age (no relationship per r value, p value, or scatterplot)
+### Scatterplot
+plot(insurancedf$Age, insurancedf$Charges, pch=16, col='blue',
+     main='Charges vs. Age',
+     xlab='Age', ylab='Charges')
+
+
+### correlation
+cor(insurancedf$Age, insurancedf$Charges)
+
+### simple linear regression model and fit
+fit <- lm(charges ~ age, data=insurancedf)
+summary(fit)
+
+## BMI (no relationship per r value, p value, or scatterplot)
+### Scatterplot
+plot(insurancedf$BMI, insurancedf$Charges, pch=16, col='blue',
+     main='Charges vs. BMI',
+     xlab='BMI', ylab='Charges')
+
+
+### correlation
+cor(insurancedf$Age, insurancedf$Charges)
+
+### simple linear regression model and fit
+fit <- lm(charges ~ BMI, data=insurancedf)
+summary(fit)
+
+## Children (no relationship per r value, p value, or scatterplot)
+### Scatterplot
+plot(insurancedf$Children, insurancedf$Charges, pch=16, col='blue',
+     main='Charges vs. Children',
+     xlab='Children', ylab='Charges')
+
+
+### correlation
+cor(insurancedf$Children, insurancedf$Charges)
+
+### simple linear regression model and fit
+fit <- lm(charges ~ children, data=insurancedf)
+summary(fit)
+
+
+
+```
+
+# Question 3
+
+Generate a regression equation in the following form:
+
+$$Charges = \beta_{0}+\beta_{1}*Age+\beta_{2}*BMI+\beta_{3}*Children$$
+
+```{r q3}
+chargeslm <-lm(charges ~ age + BMI + children, data = insurancedf)
+
+summary(chargeslm)
+
+
+```
+
+$$Charges = 13573.19 - 23.2*Age +90.38*BMI - 827.79*Children$$
+also write out the regression cleanly in this document.
+
+# Question 4
+
+An eager insurance representative comes back with a potential client. The client is 40, their BMI is 30, and they have one dependent. Using the regression equation above, predict the amount of medical expenses associated with this policy. (Provide a 95% confidence interval as well)
+
+## I have tried two ways to solve this. The first uses coefficients from the previous equation, the second is a prediction model that includes the confidence interval. I believe the second method to be correct. 
+```{r q4}
+13573.19 - 23.2 * 40 + 90.38 * 30 - 827.79 * 1
+```
+
+```{r}
+data.frame <- insurancedf
+newPrediction <- data.frame(age = 40, BMI = 30, children = 1)
+predict(chargeslm,
+        newdata = newPrediction,
+        interval = "confidence",
+        level = .95)
+```
