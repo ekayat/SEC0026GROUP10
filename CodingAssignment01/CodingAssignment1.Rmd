@@ -27,6 +27,7 @@ library(readr)
 library(car)
 ```
 
+`Combine code and responses into one document in next submission`
 
 A Florida health insurance company wants to predict annual claims for individual clients. The company pulls a random sample of 50 customers. The owner wishes to charge an actuarially fair premium to ensure a normal rate of return. The owner collects all of their current customer’s health care expenses from the last year and compares them with what is known about each customer’s plan. 
 
