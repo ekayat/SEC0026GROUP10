@@ -169,8 +169,6 @@ cor(insurancedf$Children, insurancedf$Charges)
 fit <- lm(charges ~ children, data=insurancedf)
 summary(fit)
 
-
-
 ```
 
 # Question 3
@@ -184,20 +182,14 @@ chargeslm <-lm(charges ~ age + BMI + children, data = insurancedf)
 
 summary(chargeslm)
 
-
 ```
-
-$$Charges = 13573.19 - 23.2*Age +90.38*BMI - 827.79*Children$$
 also write out the regression cleanly in this document.
+
+Regression:  $$Charges = 13573.19 - 23.2*Age +90.38*BMI - 827.79*Children$$
 
 # Question 4
 
 An eager insurance representative comes back with a potential client. The client is 40, their BMI is 30, and they have one dependent. Using the regression equation above, predict the amount of medical expenses associated with this policy. (Provide a 95% confidence interval as well)
-
-## I have tried two ways to solve this. The first uses coefficients from the previous equation, the second is a prediction model that includes the confidence interval. I believe the second method to be correct. 
-```{r q4}
-13573.19 - 23.2 * 40 + 90.38 * 30 - 827.79 * 1
-```
 
 ```{r}
 data.frame <- insurancedf
