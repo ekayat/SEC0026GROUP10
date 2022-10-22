@@ -1,11 +1,16 @@
 ---
 title: "Coding Assignment 2"
-author: "Team N"
-date: "Due: 2021-10-23 23:59"
-output: 
+author: "Team 10"
+date: "Due: 2022-10-23"
+output:
+  pdf_document:
+    toc: yes
   html_document:
-    toc: true
-    toc_float: true
+    toc: yes
+    toc_float: yes
+editor_options:
+  markdown:
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -13,26 +18,53 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-A Florida health insurance company wants to predict annual claims for individual clients. The company pulls a random sample of 50 customers. The owner wishes to charge an actuarially fair premium to ensure a normal rate of return. The owner collects all of their current customer’s health care expenses from the last year and compares them with what is known about each customer’s plan. 
+```{r packages}
+#Put any packages you need here
+library(readr)
+library(readxl)
+library(car)
+```
+
+A Florida health insurance company wants to predict annual claims for
+individual clients. The company pulls a random sample of 50 customers.
+The owner wishes to charge an actuarially fair premium to ensure a
+normal rate of return. The owner collects all of their current
+customer's health care expenses from the last year and compares them
+with what is known about each customer's plan.
 
 The data on the 50 customers in the sample is as follows:
 
--	Charges: Total medical expenses for a particular insurance plan (in dollars)
--	Age: Age of the primary beneficiary
--	BMI: Primary beneficiary’s body mass index (kg/m2)
--	Female: Primary beneficiary’s birth sex (0 = Male, 1 = Female)
--	Children: Number of children covered by health insurance plan (includes other dependents as well)
--	Smoker: Indicator if primary beneficiary is a smoker (0 = non-smoker, 1 = smoker)
--	Cities: Dummy variables for each city with the default being Sanford
+-   Charges: Total medical expenses for a particular insurance plan (in
+    dollars)
+-   Age: Age of the primary beneficiary
+-   BMI: Primary beneficiary's body mass index (kg/m2)
+-   Female: Primary beneficiary's birth sex (0 = Male, 1 = Female)
+-   Children: Number of children covered by health insurance plan
+    (includes other dependents as well)
+-   Smoker: Indicator if primary beneficiary is a smoker (0 =
+    non-smoker, 1 = smoker)
+-   Cities: Dummy variables for each city with the default being Sanford
 
-Answer the following questions using complete sentences and attach all output, plots, etc. within this report.
-
+Answer the following questions using complete sentences and attach all
+output, plots, etc. within this report.
 
 ```{r dataset, include=FALSE}
-insurance <- read.csv("../Data/insurance_0026_Group1.csv")
+#LM - Load dataset:  Note: removed read.csv and changed to read_csv due to speed of system read
+insurance <- read.csv("../Data/insurance_0026_Group10.csv")
 ```
 
-
+```{r convert variables}
+#LM - Convert all variables into labels
+Charges <- insurance[,1]
+Age <- insurance[,2]
+BMI <- insurance[,3]
+Female <- insurance[,4]
+Children <- insurance[,5]
+Smoker <- insurance[,6]
+WinterSprings <- insurance[,7]
+WinterPark <- insurance[,8]
+Oviedo <- insurance[,9]
+```
 
 ## Question 1
 
@@ -40,42 +72,123 @@ Generate this regression equation:
 
 $$Charges = \beta_{0}+\beta_{1}*Age+\beta_{2}*BMI+\beta_{3}*Children + \beta_{4}*Female + \beta_{5}*Smoker + \beta_{6}*WinterSprings + \beta_{7}*WinterPark + \beta_{8}*Oviedo$$
 
-```{r q1}
-
+```{r Regression Model}
+#LM - Regression Equation based on above information
+Rmodel <- lm(Charges ~ ., data = insurance )
+summary(Rmodel)
 ```
 
-Which independent variables test significant in a two-tailed test? Use $\alpha = 0.2$
+<font color="#00558b"><b>Question 1 Regression Equation</b></font>
 
+$$Charges = -1806.84 + 165.91*Age + 189.61*BMI - 611.55*Children - 862.22*Female + 19463.54*Smoker - 2696.75*WinterSprings + 1473.58*WinterPark + 740.28*Oviedo$$
 
+Which independent variables test significant in a two-tailed test? Use
+$\alpha = 0.2$
+
+<font color="#00558b"><b>Question 1 Analysis</b></font>
+
+<ul>
+
+<li>
+
+Smoker tests significant because      <b>2.3131e-09 \< .2 </b> </br>
+
+<li>
+
+Age tests significant because            <b>0.015478     \< .2</b>
+
+</ul>
 
 ## Question 2
 
-Interpret the coefficients of all the independent variables that tested significant.
+Interpret the coefficients of all the independent variables that tested
+significant
 
+<font color="#00558b"><b>Question 2 Analysis</b></font>
+
+      <b>Overall</b></br>
+      Smoker and Age test statistically significant based on $\alpha = 0.2$ therefore:</br>
+      We have sufficient evidence to conclude the slopes of the coefficients are not equal to zero.</br>
+      <b>Marginal analysis:  Smoker.  </b></br>
+      Dummy variable.            Smoker increases charges by $19463.54.  Non-smoker has no affect on charges.</br>
+      <b>Marginal analysis:  Age.</b></br>
+      Qualitative variable.      Age charges are $165.91 per year for each year of client's life.
 
 ## Question 3
 
 The insurance agent returns with another client:
 
-- Age: 35
-- BMI: 26
-- Children: 1
-- Gender: Female
-- Smoker: No
-- City: Sanford
+-   Age: 35
+-   BMI: 26
+-   Children: 1
+-   Gender: Female
+-   Smoker: No
+-   City: Sanford
 
-Using the regression equation above, predict the amount of medical expenses associated with this policy. (Provide a 95% confidence interval as well)
+Using the regression equation above, predict the amount of medical
+expenses associated with this policy. (Provide a 95% confidence interval
+as well)
 
-```{r q3}
-
+```{r predict}
+#LM - From Simple Regression Lecture, added 95% confidence level; copied and pasted from previous assignment
+newPrediction <- data.frame  (Age = 35, BMI = 26, Children = 1, Female = 1, Smoker = 0, 
+                              WinterSprings = 0, WinterPark = 0, Oviedo = 0)
+predict(Rmodel,
+        newdata = newPrediction,
+        interval = "confidence",
+        level = .95)
 ```
+
+<font color="#00558b"><b>Question 3 Analysis</b></font>
+
+<ul>
+
+<li>
+
+The estimate of charges is $7,456.
+
+<li>
+
+There is a lower limit of $2,409.13 and an upper limit of $12,503.12 at an 95% confidence interval.</b>
+
+</ul>
 
 ## Question 4
 
-Compare the model from question 1, to a model that does not include the group of city dummies. Does including the cities reduce the SSE by a statistically significant amount? (check the partial F-test for significance of the dummies as a group). Use $\alpha = 0.05$
+Compare the model from question 1, to a model that does not include the
+group of city dummies. Does including the cities reduce the SSE by a
+statistically significant amount? (check the partial F-test for
+significance of the dummies as a group). Use $\alpha = 0.05$
 
-```{r q4}
+```{r delete cities}
+
+#LM - Delete city fields
+
+model_reduced <- insurance[,-(7:9)]
+
+model_reduced <- lm(Charges ~., data = model_reduced)
+
+summary(model_reduced)
 
 ```
 
+```{r Regression Model Comparison}
+#LM - Regression Equation based on above information
+anova(model_reduced, Rmodel)
+```
+
+<font color="#00558b"><b>Question 4 Analysis</b></font>
+
+<ul><b>F-Test:</b>
+<li>Null hypothesis: Removing the city independent variables from the equation makes no difference:
+
+$$H_{0}: Cities = 0 $$
+
+and the alternative hypothesis indicates removing the cities (independent variables) does make a difference:
+
+$$H_{A}: Cities \neq 0$$
+
+<li>A comparison shows the F statistic to be .8245 and the p-value associated with the F statistic to be .4879.  The P value for F indicates city is not statistically significant.
+<li>Since we are given 95% level of significance and since .4879 > .05 we have to accept the null hypothesis as true.
+<li>Given the above we therefore conclude that the coefficients are not statistically significant.  Note that including the cities does not reduce the SSE at all, rather it increases the SSE. 
 
