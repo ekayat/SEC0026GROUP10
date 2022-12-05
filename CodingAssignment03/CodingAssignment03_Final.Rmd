@@ -177,7 +177,7 @@ hist(insure$lnCharges) #after
 scatterplotMatrix(insure[,c(10,2,3,4)]) # grabbing lnSalesPrice
 ```
 
-<h4 style="color:green">Evaluating Age with Data Models</h4>
+<h3 style="color:green">Evaluating Age with Data Models</h3>
 ```{r}
 insure$lnAge <- log(insure$Age)
 insure$ageSquared <- insure$Age^2
@@ -332,7 +332,7 @@ mape(test$error_1, test$Charges)
 mape(test$error_2, test$Charges)
 ```
 
-<h4 style="color:blue">Performance Analysis</h3>
+<h3 style="color:blue">Performance Analysis</h3>
 
 <ul>
 <li>Ins Model = Initial Base Model</li>
@@ -350,7 +350,7 @@ mape(test$error_2, test$Charges)
 
 Provide interpretations of the coefficients, do the signs make sense? Perform marginal change analysis (thing 2) on the independent variables.
 
-<h4 style="color:blue">Coefficient Analysis</h3>
+<h3 style="color:blue">Coefficient Analysis</h3>
 Assumptions
 <ul>
 <li>Industry standard of 95% signifigance, 5% confidence interval, 2 confidence value accepted</li>
@@ -395,13 +395,13 @@ Relationship:  Indirect</br>
 Marginal Change Analysis:  Does not test significant, not req'd</br>
 Notes: WinterSprings has an inverse relationship in our initial model and also in our quad model but it has a direct relationship in the log model.  It does not test significant in any model.</li>
 
-<li><b>WinterPark</b>
+<li><b>WinterPark</b></br>
 Tests Significant:  No</br>
 Relationship:  Direct</br>
 Marginal Change Analysis:  Does not test significant, not req'd</br>
 Notes: This coefficient has a direct relationship in all models but does not test significant in any model.</li>
 
-<li><b>Oviedo</b>
+<li><b>Oviedo</b></br>
 Tests Significant:  No</br>
 Relationship:  Direct</br>
 Marginal Change Analysis:  Does not test significant, not req'd</br>
@@ -420,7 +420,7 @@ An eager insurance representative comes back with five potential clients. Using 
 | 4        | 33  | 35  | 1      | 2        | 0      | Winter Springs |
 | 5        | 45  | 27  | 1      | 3        | 0      | Oviedo         |
 
-<h4 style="color:blue">Performance Analysis</h3>
+<h3 style="color:blue">Prediction Analysis</h3>
 
 
 ```{r}
