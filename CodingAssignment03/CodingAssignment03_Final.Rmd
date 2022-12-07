@@ -14,11 +14,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r packages}
 library(readxl) # reading in excel file
-library(car) # for vif function
+library(car) # for vif function - VIF measures the strength of the correlation between the independent variables in regression analysis.  VIF score over 5 is an issue.  A VIF score over 10 should be remedied.
 library(plotly) # for interactive visualizations
-library(gt) # for better looking tables
-library(gtsummary) # for better summary statistics
-library(corrplot)
+library(gt) # esthetically pleasing tables
+library(gtsummary) # present easier read statistics 
+library(corrplot) # for correlation plot
+library(dplyr) #data manipulation
 
 ```
 
@@ -39,21 +40,35 @@ Answer the following questions using complete sentences and attach all output, p
 
 
 ```{r}
+#import dataset
+#insurance = label we are assigning to our data set to make it easier to utilize
+#read.csv (also could use read_csv associated with readr because it parses faster) = command to read our file
+#"../Data/insurance_0026_Group10.csv" = three dots indicate this file is in on our drive, Data is the folder, the name of the file is insurance_0026_Group10.csv
 insurance <- read.csv("../Data/insurance_0026_Group10.csv")
 
+#Display data using gt which puts it into an easy to read table
+#Lisa - you have a markdown .pdf on your drive explaining the gt group
 gt(head(insurance))
 ```
+
 
 ```{r}
 ins_model <- lm(Charges ~., data = insurance)
 
-summary(ins_model)
+#summary(ins_model)
+
+#If I just want the coefficients - summary(ins_model)$coefficients
 
 # or (fancy output)
-
+# https://cran.r-project.org/web/packages/gtsummary/vignettes/tbl_regression.html explains this function a bit
+# Professor's code adds the Adjusted R-Squared.  If I don't need adjusted r squared the base command is:
+# tbl_regression(ins_model)
+# estimate_fun - function to round and format -coefficient- values
+# style_sigfig - scientific notation is output is avoided, however, add'l sig figures may be displayed for very large numbers.  x is number vector.  4 is digits to diplay.
 tbl_regression(ins_model,
                estimate_fun =  ~style_sigfig(.x, digits = 4)) %>% as_gt() %>%
   gt::tab_source_note(gt::md(paste0("Adjusted R-Squared: ",round(summary(ins_model)$adj.r.squared* 100,digits = 2),"%")))
+
 ```
 
 ## Question 1
@@ -63,7 +78,7 @@ Randomly select three observations from the sample and exclude from all modeling
 
 ```{r}
 set.seed(135791)
-index <- sample(seq_len(nrow(insurance)), size = 10)
+index <- sample(seq_len(nrow(insurance)), size = 3)
 
 insure <- insurance[-index,]
 test <- insurance[index,]
@@ -72,11 +87,12 @@ test <- insurance[index,]
 <h3 style="color:blue">Elaborate Summary - 47 Observations</h3>
 
 ```{r, message = FALSE}
-summary(insure)
+#summary(insure)
 
 
 # or 
 
+# insure is calling the reduced data set and %>% passes the information down to the next function.  He is setting up the parameters.  Are those automatic or are they set somewhere?
 insure %>% 
   tbl_summary(statistic = list(all_continuous() ~ c("{mean} ({sd})",
                                                     "{median} ({p25}, {p75})",
@@ -87,13 +103,14 @@ insure %>%
 ```
 
 <h3 style="color:blue">Notes/Observations</h3>
-If we have observations that fall outside of our "Insure Most" data then there will be room for extrapolation error.  We want to see our test values be between the Min and Max.  
+If we have observations that fall outside of our "Insure" dataset then there will be room for extrapolation error.  We want to see our test values be between the Min and Max.  
 <ul>
 <li>Common sense states that a smoker is going to require more insurance than a non-smoker.  Smokers usually are going to have to be charged more in insurance premiums.</li>
-<li>Age is a natural identifies of who will utilize more insurance.  Younger people are generally healthier than older people and therefore pay less in insurance. </li>
+<li>Age is a natural identifier of who will utilize more insurance.  Younger people are generally healthier than older people and therefore pay less in insurance. </li>
 <li>BMI is not as intuitive as other fields.  It may work better to be evaluated as a dummy variable with 0 being normal and 1 being outside the normal range.</li>
 <li>The curve is skewed to the right as the mean is about $2,000 larger than the median.</li>
-<li>The range is broad and it is likely that there are outliers in the data .  
+<li>The range is broad and it is likely that there are outliers in the data Based on the mean and the skewness it is apparent these outliers are more then likely to the right of the median.</li>
+</ul>
 
 ## Question 2
 
@@ -116,14 +133,17 @@ diag = FALSE)
 scatterplotMatrix(insure[,1:4])
 ```
 
+<h3 style="color:blue">Question 2 Observations</h3>
+It does not appear that any strong correlations exist between independent variables therefore multicollinearity concerns need not be addressed.
 
 ## Question 3
 
-Run a regression that includes all independent variables in the data table. Does the model above violate any of the Gauss-Markov assumptions? If so, what are they and what is the solution for correcting?
-
+Run a regression that includes <b>all independent variables</b> in the data table. Does the model above violate any of the Gauss-Markov assumptions? If so, what are they and what is the solution for correcting?
 
 ```{r Regression Model Simple}
 #<h3 style="color:blue">Simple Regression Model</h3>
+model <- lm(Charges ~., data = insure)
+
 #Simple Regression
 
 #summary(model)
@@ -131,7 +151,7 @@ Run a regression that includes all independent variables in the data table. Does
 
 <h3 style="color:blue">Elaborate Regression Model</h3>
 ```{r Regression Model Elaborate}
-model <- lm(Charges ~., data = insure)
+
 tbl_regression(model,
                estimate_fun =  ~style_sigfig(.x, digits = 4)) %>% as_gt() %>%
   gt::tab_source_note(gt::md(paste0("Adjusted R-Squared: ",round(summary(model)$adj.r.squared* 100,digits = 2),"%")))
@@ -141,19 +161,32 @@ tbl_regression(model,
 <h3 style="color:blue">Utilizing Plots to Evaluate Gauss-Markov Assumptions</h3>
 
 ```{r "Assumption Test fig.height= 8, fig.width=8"}
+#par = splits the plotting device into defined sections
+#mfrow = number of columns and rows.  So 1, 2 would be one row and two columns.  2,2 means two rows and two columns.  I tried 1 row and 4 columns and it was so unreadable...  
 par(mfrow=c(2,2))
+#how does system know to call the four regression plots?
 plot(model)
 ```
 
 <h3 style="color:blue">Gauss-Markov Assumption Analysis</h3>
 <ul>
-<li>Observing the "Residuals vs. Fitted" plot, one realizes there is not "true pattern". As indicated by the location of the data points, especially of 42, 7, and 1, it is apparent there is a non-linear relationship.  This non-linear relationship indicates a classical assumption has been violated.</li>
+<li><b>Residuals vs. Fitted</b></br>
+Observing the "Residuals vs. Fitted" plot, one realizes there is not "true pattern". As indicated by the location of the data points, especially of 42, 7, and 1, it is apparent there is a non-linear relationship.  This non-linear relationship indicates a classical assumption has been violated.</li>
 
-<li>Observing the "Normal Q-Q" plot one may makes assumptions regarding a normally distributed dependent variable for a fixed set of predictors. In this case there is not a 45-degree line upwards, therefore, unfortunately, it cannot be verified.</li>
+<li><b>Normal Q-Q"</b></br>
+Observing the "Normal Q-Q" plot one may makes assumptions regarding a normally distributed dependent variable for a fixed set of predictors. In this case there is not a 45-degree line upwards, therefore, unfortunately, it cannot be verified.</li>
 
-<li>Observing the "Scale-Location" plot indicates likelihood of homoskedasticity. Unfortunately the line is not horizontal and the points are again scattered about rather non-uniformly with 42, 7, and 1 residing along the edges of the chart.</li>
+<li><b>Scale-Location</b></br>
+Observing the "Scale-Location" plot indicates likelihood of homoskedasticity. Unfortunately the line is not horizontal and the points are again scattered about rather non-uniformly with 42, 7, and 1 residing along the edges of the chart.</li>
 
-<li>As indicated in Professor Eubank's notes, the "Residuals vs. Leverage" plot indicates regression outliers, influential observations, and high leverage points.  It is not, however, required to be part of this evaluation.</li>
+<li><b>Residuals vs. Leverage</b></br>
+As indicated in Professor Eubank's notes, the "Residuals vs. Leverage" plot indicates regression outliers, influential observations, and high leverage points.  It is not required to be part of this evaluation.  That being said, it is noted that all observations appear to be within Cook's distance and are therefore considered to be influential observations</li>
+
+<li>It may be possible to see a change by
+<ul>
+<li>Transforming the dependent variable, Charges, into logrithmic form as we work to achieve a more normal distribution.
+<li>Transforming Age and BMI into to logarithmic and squared values in order to reevaluate the data.  Note that both age and BMI are quantitative variables.
+</ul>
 </ul>
 
 
@@ -161,8 +194,9 @@ plot(model)
 
 Implement the solutions from question 3, such as data transformation, along with any other changes you wish. Use the sample data and run a new regression. How have the fit measures changed? How have the signs and significance of the coefficients changed?
 
-<h3 style="color:blue">Data Transformation Utilizing Logs as Advised</h3>
+<h3 style="color:blue">Data Transformation of Dependent Variable Utilizing Logs</h3>
 ```{r}
+#So this one says to display this as 1 row and 2 colums per mfrow but I could do two rows and one column.  I tested 1, 1 so it would display as one row and one column for each as it does when I comment it out.  This is pretty cool...
 par(mfrow=c(1,2))
 hist(insure$Charges) #before
 
@@ -171,26 +205,29 @@ insure$lnCharges <- log(insure$Charges)
 hist(insure$lnCharges) #after
 
 ```
-<h3 style="color:blue">Log Data Scatterplots</h3>
+<h3 style="color:blue">Dependent Variable (Charges) Log Data Scatterplots</h3>
 
 ```{r}
-scatterplotMatrix(insure[,c(10,2,3,4)]) # grabbing lnSalesPrice
+scatterplotMatrix(insure[,c(10,2,3,4)]) # grabbing lnCharges
 ```
 
-<h3 style="color:green">Evaluating Age with Data Models</h3>
+
 ```{r}
+#setting new fields into the insure data set
 insure$lnAge <- log(insure$Age)
 insure$ageSquared <- insure$Age^2
+insure$lnBMI <- log(insure$BMI)
+insure$BMISquared <- insure$BMI^2
 
 View(insure)
 ```
 
-<h4 style="color:green">Age with Logarithmic Shape</h4>
+<h3 style="color:green">Evaluating Age with Logarithmic Shape</h3>
 
 ```{r}
 model_1 <- lm(lnCharges ~., data = insure[,c(10,11,3:9)] ) #pulling only columns I want
 
-summary(model_1)
+#summary(model_1)
 
 # or
 
@@ -204,15 +241,16 @@ par(mfrow=c(2,2))
 plot(model_1)
 ```
 
-<h3 style="color:blue">Transformation Solution Analysis</h3>
+<h4 style="color:blue">Transformation Solution Analysis for Logarithmic Age</h4>
 <ul>
 <li>Utilizing the log of Charges does make a significant difference in the shape of the distribution.</li>
-<li>There is nonlinearity between Charges and the other independent variables.  It is difficult to determine the source of the nonlinearity.
+<li>There is nonlinearity between Charges and the other independent variables.  It is difficult to determine the source of the nonlinearity.</li>
+</ul>
 
-<h4 style="color:green">Age with Quadradic Shape</h4>
+<h3 style="color:green">Evaluating Age with Quadradic Shape</h3>
 
 ```{r}
-model_2 <- lm(lnCharges ~., data = insure[,c(10,2:9,12)] ) #pulling only columns I want
+model_2 <- lm(lnCharges ~., data = insure[,c(12,3:9,10)] ) #pulling only columns I want
 
 summary(model_2)
 
@@ -227,6 +265,56 @@ tbl_regression(model_2,
 par(mfrow=c(2,2))
 plot(model_2)
 ```
+<h4 style="color:blue">Transformation Solution Analysis for Quadratic Age</h4>
+<ul>
+<li>Utilizing the quad of Charges does make a significant difference in the shape of the distribution.</li>
+<li>There is nonlinearity between Charges and the other independent variables.  It is difficult to determine the source of the nonlinearity.</li>
+</ul>
+
+<h3 style="color:green">Evaluating BMI with Logarithmic Shape</h3>
+
+```{r}
+model_3 <- lm(lnCharges ~., data = insure[,c(13,3:9,10)] ) #pulling only columns I want
+
+summary(model_3)
+
+# or
+
+tbl_regression(model_3,
+               estimate_fun =  ~style_sigfig(.x, digits = 4)) %>% as_gt() %>%
+  gt::tab_source_note(gt::md(paste0("Adjusted R-Squared: ",round(summary(model_3)$adj.r.squared* 100,digits = 2),"%")))
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(model_3)
+```
+
+<h4 style="color:blue">Transformation Solution Analysis for Logrithmic BMI</h4>
+<ul>
+<li>Utilizing the quad of Charges does make a significant difference in the shape of the distribution.</li>
+<li>There is nonlinearity between Charges and the other independent variables.  It is difficult to determine the source of the nonlinearity.</li>
+</ul>
+
+
+<h3 style="color:green">Evaluating BMI with Quadratic Shape</h3>
+```{r}
+model_4 <- lm(lnCharges ~., data = insure[,c(14,3:9,10)] ) #pulling only columns I want
+
+summary(model_4)
+
+# or
+
+tbl_regression(model_4,
+               estimate_fun =  ~style_sigfig(.x, digits = 4)) %>% as_gt() %>%
+  gt::tab_source_note(gt::md(paste0("Adjusted R-Squared: ",round(summary(model_4)$adj.r.squared* 100,digits = 2),"%")))
+```
+
+<h4 style="color:blue">Transformation Solution Analysis for Quadratic BMI</h4>
+<ul>
+<li>Utilizing the quad of Charges does make a significant difference in the shape of the distribution.</li>
+<li>There is nonlinearity between Charges and the other independent variables.  It is difficult to determine the source of the nonlinearity.</li>
+</ul>
 
 ## Question 5
 
@@ -239,6 +327,8 @@ ln_test_model_age
 test$lnCharges <- log(test$Charges)
 test$lnAge <- log(test$Age)
 test$ageSquared <- test$Age^2
+test$lnBMI <- log(test$BMI)
+test$BMISquared <- test$BMI^2
 
 View(test)
 ```
@@ -250,6 +340,10 @@ test$model_1_pred <- predict(model_1,newdata = test) %>% exp()
 
 test$model_2_pred <- predict(model_2,newdata = test) %>% exp()
 
+test$model_3_pred <- predict(model_3,newdata = test) %>% exp()
+
+test$model_4_pred <- predict(model_4,newdata = test) %>% exp()
+
 # Finding the error
 
 test$error_bm <- test$ins_model_pred - test$Charges
@@ -257,9 +351,13 @@ test$error_bm <- test$ins_model_pred - test$Charges
 test$error_1 <- test$model_1_pred - test$Charges
 
 test$error_2 <- test$model_2_pred - test$Charges
+
+test$error_3 <- test$model_3_pred - test$Charges
+
+test$error_4 <- test$model_4_pred - test$Charges
 ```
 
-<h4 style="color:green">Bias</h4>
+<h3 style="color:green">Bias</h3>
 
 ```{r}
 # Ins Model
@@ -270,14 +368,18 @@ mean(test$error_1)
 
 # Model 2
 mean(test$error_2)
+
+# Model 3
+mean(test$error_3)
+
+# Model 4
+mean(test$error_4)
 ```
 
-<h4 style="color:green">MAE</h4>
+<h3 style="color:green">MAE</h3>
 
 
 ```{r}
-# I decided to create a function to calculate this
-
 mae <- function(error_vector){
   error_vector %>% 
   abs() %>% 
@@ -293,9 +395,14 @@ mae(test$error_1)
 # Model 2
 mae(test$error_2)
 
+# Model 3
+mean(test$error_3)
+
+# Model 4
+mean(test$error_4)
 ```
 
-<h4 style="color:green">RMSE</h4>
+<h3 style="color:green">RMSE</h3>
 
 ```{r}
 rmse <- function(error_vector){
@@ -307,14 +414,21 @@ rmse <- function(error_vector){
 
 # Ins Model
 rmse(test$error_bm)
+
 # Model 1
 rmse(test$error_1)
 
 # Model 2
 rmse(test$error_2)
+
+# Model 3
+mean(test$error_3)
+
+# Model 4
+mean(test$error_4)
 ```
 
-<h4 style="color:green">MAPE</h4>
+<h3 style="color:green">MAPE</h3>
 
 ```{r}
 mape <- function(error_vector, actual_vector){
@@ -325,23 +439,47 @@ mape <- function(error_vector, actual_vector){
 
 # Ins Model
 mape(test$error_bm, test$Charges)
+
 # Model 1
 mape(test$error_1, test$Charges)
 
 # Model 2
 mape(test$error_2, test$Charges)
+
+# Model 3
+mape(test$error_3, test$Charges)
+
+# Model 4
+mape(test$error_4, test$Charges)
 ```
 
 <h3 style="color:blue">Performance Analysis</h3>
 
 <ul>
+<li>Models
+<ul>
 <li>Ins Model = Initial Base Model</li>
-<li>Model 1 = Logrithmic Model</li>
-<li>Model 2 = Quadratic Model</li>
-   <ul>
-   <li>The initial base model appears to be the worst performing but the output is somewhat conflicting.  The MAE, which indicates how big an error we can expect from our predictions, is the smallest in this model.  RMSE and MAPE are both higher than the the Log and Quad models but the MAE is higher.</li>
-   <li>The Log model had the lowest RSME so it would likely be the best short term model.
-   <li>The Quad model had the lowest MAPE so it would likely be the best long term model.
+<li>Model 1 = Age Logrithmic Model</li>
+<li>Model 2 = Age Quadratic Model</li>
+<li>Model 3 = BMI Logrithmic Model</li>
+<li>Model 4 = BMI Quadratic Model</li>
+</ul>
+<li>Analysis</li>
+<ul>
+   <li><b>Bias</br>
+   Model 4 Performs Best</b></br>
+   A low bias model will closely match the training data set.  Our high numbers indicate that the estimate of one of the parameters is too high or too low.  A negative bias indicates the coefficient is underestimated.  A positive bias indicates the coefficient is over estimated.  Taking these factors into consideration, it appears that Model 4, the Quadratic BMI has the least amount of bias.  As expected Ins Model, our base model, has the most amount of bias.
+<li><b>MAE</br>
+   Model 4 Performs Best</b></br>
+   Mean Absolute Error evaluates the absolute distance of the observations (the entries of the dataset) to the predictions on a regression, taking the average over all observations.  Model 4, the Quadratic BMI, has the closest forecast to actual value while Ins Model, our base model has the most distant forecase to actual value.</li>
+   <li><b>RSME</br>
+   Model 4 performs best</b></br>
+   Root Square Mean Estimate (RSME) is the *absolute* fit of the model to the data.  Note this measure of fit is different from the R-squared as R-squared is *relative* measure of the fit.  The initial base Ins Model appears to be the worst performing, Models 1, 2, and 3 are in the middle, and Model 4, the Quadratic BMI performs the best.  We would, therefore, chose Model 4.
+   <li><b>MAPE</br>
+   Model 1 performs best</b></br>
+   The mean absolute percentage error (MAPE) is the average percentage difference between predictions and and where the actual values end up.  The best performing model is Model 1, the Log Age, which indicates the predicted value will be approximately .88 away from the actual value.  </li>
+   <li>Model 4 had the lowest RSME so it would likely be the best short term model.
+   <li>Model 1 had the lowest MAPE so it would likely be the best long term model.
 </ul>
 </ul>
 
@@ -360,50 +498,59 @@ Assumptions
 <ul>
 
 <li><b>Age</b></br>
-Tests Significant:  Yes</br>
-Relationship:  Direct</br>
-Marginal Change Analysis:  165.91 +/- (2*65.67) = <b>(34.56, 297.25)</b></br>
+Tests Significant Ins Model:  Yes</br>
+Relationship Ins Model:  Direct</br>
+Marginal Change Analysis Model 1: <b>(33.29, 298.50)</b> per chart</br>
+Notes: As expected age tests significant as directly effecting the original regression equation. It also effects the log model.  It does not test significant for the quad model.</li>
+
+<li><b>lnAge</b></br>
+Tests Significant Model 1:  Yes</br>
+Relationship Ins Model:  Direct</br>
+Marginal Change Analysis Model 1:  <b>(.4218, 1.179)</b> per chart - converted back is <b>(2.641, 15.10)</b> </br>
 Notes: As expected age tests significant as directly effecting the original regression equation. It also effects the log model.  It does not test significant for the quad model.</li>
 
 <li><b>BMI</b></br>
-Tests Significant:  No</br>
-Relationship:  Direct</br>
-Marginal Change Analysis:  Does not test significant, not req'd</br>
+Tests Significant Ins Model & Model 1:  No</br>
+Relationship Ins Model & Model 1:  Direct</br>
+Marginal Change Analysis Ins Model & Model 1:  Does not test significant, not req'd</br>
 Notes:  BMI does not test significant for any of the models.  This is not significantly surprising as BMI scores are not as indicative of good health as other factors.  As previously noted, this independent variable may work better as a dummy variable where BMI is a 0 if normal and 1 if not normal.</li>
 
 <li><b>Female</b></br>
-Tests Significant:  No</br>
-Relationship:  Indirect</br>
-Marginal Change Analysis:  Does not test significant, not req'd</br>
+Tests Significant Ins Model & Model 1:  No</br>
+Relationship Ins Model & Model 1:  Direct</br>
+Marginal Change Analysis Ins Model & Model 1:  Does not test significant, not req'd</br>
 Notes: Gender does not test significant in any of the models, however it is noted that females have an indirect relaionship to insurance charges.</li>
 
 <li><b>Children</b></br>
-Tests Significant:  No</br>
-Relationship:  Indirect</br>
-Marginal Change Analysis:  Does not test significant, not req'd</br>
+Tests Significant Ins Model & Model 1:  No</br>
+Relationship Ins Model & Model 1:  Indirect</br>
+Marginal Change Analysis Ins Model & Model 1:  Does not test significant, not req'd</br>
 Children coefficient shows an inverse relationship.  It also tests outside of the significant range.  Note that it is not intuitive that the number of children would reduce the cost of a plan.</li>
 
 <li><b>Smoker</b></br>
-Tests Significant:  Yes</br>
-Relationship:  Direct</br>
-Marginal Change Analysis:  19463.54 +/- (2*2558.23) = <b>(14,347.08, 24,580)</b></br>
+Tests Significant Ins Model and Model 1:  Yes</br>
+Relationship Ins Model and Model 1:  Direct</br>
+Marginal Change Analysis:</br>
+Ins Model: <b>(14,297, 24,630)</b> per chart</br>
+Model 1: <b>(.9163, 1.707)</b> per chart - converted back to non-log is <b>(8.25, 50.93)</b>
 Notes: Being a smoker directly impacts the cost of insurance charges, vastly outrunning all other independent variables, in all three models and also tests highly significant in all three models.</li>
 
 <li><b>WinterSprings</b></br>
-Tests Significant:  No</br>
-Relationship:  Indirect</br>
-Marginal Change Analysis:  Does not test significant, not req'd</br>
+Tests Significant Ins Model & Model 1:  No</br>
+Relationship Ins Model & Model 1:  Indirect</br>
+Marginal Change Analysis Ins Model & Model 1:  Does not test significant, not req'd</br>
 Notes: WinterSprings has an inverse relationship in our initial model and also in our quad model but it has a direct relationship in the log model.  It does not test significant in any model.</li>
 
 <li><b>WinterPark</b></br>
-Tests Significant:  No</br>
-Relationship:  Direct</br>
-Marginal Change Analysis:  Does not test significant, not req'd</br>
+Tests Significant Ins Model & Model 1:  No</br>
+Relationship Ins Model & Model 1:  Direct</br>
+Marginal Change Analysis Ins Model & Model 1:  Does not test significant, not req'd</br>
 Notes: This coefficient has a direct relationship in all models but does not test significant in any model.</li>
 
 <li><b>Oviedo</b></br>
-Tests Significant:  No</br>
-Relationship:  Direct</br>
+Tests Significant Ins Model & Model 1:  No</br>
+Relationship Ins Model & Model 1:  Direct</br>
+Marginal Change Analysis Ins Model & Model 1:  Does not test significant, not req'd</br>
 Marginal Change Analysis:  Does not test significant, not req'd</br>
 Notes: This final city coefficient has a direct relationship in our initial model and an indirect relationship in both the log and the quad model.  It does not test significant in any model.</li>
 </ul>
@@ -442,7 +589,7 @@ predict(model_1,
 
 #Customer 3
 data.frame <- model_1
-newPrediction <- data.frame(lnAge = 25, BMI = 25, Female = 0, Children = 0, Smoker = 0, WinterSprings = 0, WinterPark = 1, Oviedo = 0)
+newPrediction <- data.frame(lnAge = 25, BMI = 25, Female = 0, Children = 0, Smoker = 1, WinterSprings = 0, WinterPark = 1, Oviedo = 0)
 predict(model_1,
         newdata = newPrediction,
         interval = "confidence",
@@ -469,7 +616,11 @@ predict(model_1,
 
 The owner notices that some of the predictions are wider than others, explain why.
 
+<h3 style="color:blue">Question 8 Analysis</h3>
+The Farther you are away from the mean the larger the range will be for the prediction model. The three widest ranges are 1, 2 and 5. The common factors between the 3 is age and female. We can conclude that these two varibales have the most effect on the range of the prediction model.
+
 ## Question 9 
 
 Are there any prediction problems that occur with the five potential clients? If so, explain.
-
+<h3 style="color:blue">Question 9 Analysis</h3>
+There are no prediction problems, the age range is 18-64, the BMI is 20-48, children is 0-5 and all others are dummy variables either 0 or 1. All 5 of our costumers fall within these ranges. This means that there is no extrapolation error.
