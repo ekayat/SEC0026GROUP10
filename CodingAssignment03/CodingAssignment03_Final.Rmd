@@ -617,7 +617,7 @@ predict(model_1,
 The owner notices that some of the predictions are wider than others, explain why.
 
 <h3 style="color:blue">Question 8 Analysis</h3>
-The Farther you are away from the mean the larger the range will be for the prediction model. The three widest ranges are 1, 2 and 5. The common factors between the 3 is age and female. We can conclude that these two varibales have the most effect on the range of the prediction model.
+The Farther you are away from the mean the larger the range will be for the prediction model. The three widest ranges are 1, 2 and 5. The common factors between the 3 is age and female. We can conclude that these two variables have the most effect on the range of the prediction model.
 
 ## Question 9 
 
