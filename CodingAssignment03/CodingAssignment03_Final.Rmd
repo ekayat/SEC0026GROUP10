@@ -109,7 +109,7 @@ If we have observations that fall outside of our "Insure" dataset then there wil
 <li>Age is a natural identifier of who will utilize more insurance.  Younger people are generally healthier than older people and therefore pay less in insurance. </li>
 <li>BMI is not as intuitive as other fields.  It may work better to be evaluated as a dummy variable with 0 being normal and 1 being outside the normal range.</li>
 <li>The curve is skewed to the right as the mean is about $2,000 larger than the median.</li>
-<li>The range is broad and it is likely that there are outliers in the data Based on the mean and the skewness it is apparent these outliers are more then likely to the right of the median.</li>
+<li>The range is broad and it is likely that there are outliers in the data. Based on the mean and the skewness it is apparent these outliers are more then likely to the right of the median.</li>
 </ul>
 
 ## Question 2
